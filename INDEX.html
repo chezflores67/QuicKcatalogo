@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="description" content="Catálogo digital · Sabores del Paseo · Chihuahua">
+  <title>QuickCataRESTAURANTE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:    #0C0806;
+      --glass: rgba(255,255,255,0.055);
+      --glH:   rgba(255,255,255,0.095);
+      --gb:    rgba(255,255,255,0.1);
+      --gbH:   rgba(255,120,60,0.5);
+      --p1:    #FF5722;
+      --p2:    #FF9800;
+      --gold:  #FFD60A;
+      --text:  #F5E8D5;
+      --tD:    rgba(245,232,213,0.58);
+      --tDD:   rgba(245,232,213,0.32);
+      --wa:    #25D366;
+      --waG:   rgba(37,211,102,0.35);
+      --pG:    rgba(255,87,34,0.28);
+      --fd:    'Syne','Plus Jakarta Sans',sans-serif;
+      --fb:    'Plus Jakarta Sans',sans-serif;
+      --r:     20px;
+      --rs:    14px;
+    }
+    html { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
+    body { font-family:var(--fb); background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+    body::before {
+      content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+      background:
+        radial-gradient(ellipse 70% 50% at 10% 10%, rgba(255,87,34,0.13) 0%,transparent 65%),
+        radial-gradient(ellipse 55% 45% at 90% 90%, rgba(255,152,0,0.09) 0%,transparent 60%),
+        radial-gradient(ellipse 40% 60% at 50% -5%, rgba(220,80,30,0.08) 0%,transparent 55%);
+    }
+    body::after {
+      content:''; position:fixed; top:-120px; right:-120px;
+      width:400px; height:400px;
+      background:radial-gradient(circle, rgba(255,87,34,0.09) 0%,transparent 70%);
+      pointer-events:none; z-index:0;
+      animation:orbF 9s ease-in-out infinite;
+    }
+    @keyframes orbF { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-28px,28px)} }
+    #app,#toasts,#bot-wrap { position:relative; z-index:1; }
+
+    /* ── HEADER ── */
+    .hdr {
+      background:rgba(12,8,6,0.8); backdrop-filter:blur(28px);
+      border-bottom:1px solid rgba(255,255,255,0.07);
+      padding:12px 16px; position:sticky; top:0; z-index:200;
+    }
+    .hdr-inner { max-width:660px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .logo { display:flex; align-items:center; gap:10px; }
+    .logo-ic {
+      width:42px; height:42px; flex-shrink:0;
+      background:linear-gradient(135deg,var(--p1),var(--p2));
+      border-radius:13px; display:flex; align-items:center; justify-content:center;
+      font-size:21px; box-shadow:0 4px 16px var(--pG),inset 0 1px 0 rgba(255,255,255,0.25);
+    }
+    .logo-tx h1 {
+      font-family:var(--fd); font-size:16px; font-weight:800;
+      background:linear-gradient(135deg,#F5E8D5,#FFB07C);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    .logo-tx p { font-size:10px; color:var(--p2); font-weight:700; letter-spacing:.5px; text-transform:uppercase; }
+    .hdr-btn {
+      background:var(--glass); border:1px solid var(--gb);
+      color:var(--text); padding:9px 14px; border-radius:50px;
+      font-size:13px; font-weight:700; font-family:var(--fb); cursor:pointer;
+      transition:all .25s; white-space:nowrap; flex-shrink:0;
+      min-height:42px; touch-action:manipulation;
+    }
+    .hdr-btn:active { background:var(--glH); }
+
+    /* ── MAIN ── */
+    .main { max-width:660px; margin:0 auto; padding:0 14px 160px; }
+
+    /* ── HERO ── */
+    .hero {
+      margin:16px 0; border-radius:var(--r);
+      background:linear-gradient(135deg,rgba(255,87,34,0.18),rgba(255,152,0,0.12));
+      border:1px solid rgba(255,87,34,0.22);
+      padding:16px 18px; display:flex; align-items:center; gap:14px;
+      position:relative; overflow:hidden;
+    }
+    .hero::before { content:''; position:absolute; top:-40px; right:-40px; width:130px; height:130px; background:radial-gradient(circle,rgba(255,152,0,0.18) 0%,transparent 70%); }
+    .hero .hi { font-size:38px; flex-shrink:0; }
+    .hero h2 {
+      font-family:var(--fd); font-size:16px; font-weight:800;
+      background:linear-gradient(135deg,#FFE0CC,#FF9040);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:3px;
+    }
+    .hero p { font-size:12px; color:var(--tD); line-height:1.5; }
+
+    /* ── SEARCH ── */
+    .sw { margin-bottom:13px; position:relative; }
+    .sw input {
+      width:100%; padding:14px 18px 14px 46px;
+      background:var(--glass); border:1px solid var(--gb); border-radius:50px;
+      font-family:var(--fb); font-size:16px; color:var(--text);
+      outline:none; transition:all .25s; backdrop-filter:blur(12px);
+      -webkit-appearance:none;
+    }
+    .sw input::placeholder { color:var(--tDD); }
+    .sw input:focus { border-color:rgba(255,87,34,0.5); background:var(--glH); box-shadow:0 0 20px var(--pG); }
+    .sw-ic { position:absolute; left:15px; top:50%; transform:translateY(-50%); font-size:18px; opacity:.55; pointer-events:none; }
+
+    /* ── CATEGORIES ── */
+    .cats { display:flex; gap:7px; overflow-x:auto; padding-bottom:8px; margin-bottom:16px; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+    .cats::-webkit-scrollbar { display:none; }
+    .cat-btn {
+      flex-shrink:0; padding:9px 18px; border-radius:50px; border:1px solid var(--gb);
+      background:var(--glass); color:var(--tD);
+      font-family:var(--fb); font-size:13px; font-weight:700;
+      cursor:pointer; transition:all .22s; backdrop-filter:blur(10px);
+      min-height:40px; touch-action:manipulation;
+    }
+    .cat-btn.on {
+      background:linear-gradient(135deg,var(--p1),var(--p2));
+      border-color:transparent; color:white;
+      box-shadow:0 4px 18px var(--pG),inset 0 1px 0 rgba(255,255,255,0.2);
+    }
+
+    /* ── GRID ── */
+    .grid { display:grid; grid-template-columns:repeat(2,1fr); gap:13px; }
+    @media(min-width:540px){ .grid { grid-template-columns:repeat(3,1fr); } }
+
+    /* ── CARD ── */
+    .pcard {
+      background:var(--glass); backdrop-filter:blur(20px);
+      border:1px solid var(--gb); border-radius:var(--r); overflow:hidden;
+      cursor:pointer; transition:all .3s cubic-bezier(0.34,1.56,0.64,1);
+      box-shadow:0 8px 28px rgba(0,0,0,0.42);
+      touch-action:manipulation;
+    }
+    .pcard:active { transform:scale(.97); }
+    @media(hover:hover){ .pcard:hover { border-color:rgba(255,87,34,0.4); box-shadow:0 16px 48px rgba(0,0,0,0.6),0 0 28px rgba(255,87,34,0.18); transform:translateY(-5px); } }
+    .pcard.unavail { opacity:.5; }
+    .piw { position:relative; overflow:hidden; }
+    .pcard-img { width:100%; aspect-ratio:1/1; object-fit:cover; display:block; transition:transform .4s; }
+    @media(hover:hover){ .pcard:hover .pcard-img { transform:scale(1.05); } }
+    .piw::after { content:''; position:absolute; inset:0; background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,0.72) 100%); pointer-events:none; }
+    .pbadge {
+      position:absolute; top:9px; left:9px; z-index:2;
+      background:rgba(255,87,34,0.92); backdrop-filter:blur(8px);
+      color:white; font-size:9px; font-weight:800;
+      padding:4px 9px; border-radius:50px;
+      border:1px solid rgba(255,255,255,0.2); box-shadow:0 2px 10px rgba(255,87,34,0.5);
+    }
+    .uov {
+      position:absolute; inset:0; background:rgba(0,0,0,0.62);
+      display:flex; align-items:center; justify-content:center;
+      color:white; font-weight:800; font-size:13px; z-index:3;
+    }
+    .pinfo { padding:13px; }
+    /* FUENTE LEGIBLE para nombres */
+    .pname {
+      font-family:var(--fb); font-size:14px; font-weight:800;
+      color:var(--text); line-height:1.35; margin-bottom:5px;
+    }
+    .pprice {
+      font-size:17px; font-weight:800; margin-bottom:10px;
+      background:linear-gradient(135deg,var(--p1),var(--gold));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    .pver-btn {
+      width:100%; background:rgba(255,87,34,0.18); border:1px solid rgba(255,87,34,0.32);
+      color:#FFB07C; padding:9px; border-radius:11px;
+      font-family:var(--fb); font-size:12px; font-weight:800; cursor:pointer;
+      transition:all .2s; touch-action:manipulation; min-height:38px;
+    }
+    .pver-btn:active { background:linear-gradient(135deg,var(--p1),var(--p2)); color:white; }
+
+    /* ── EMPTY ── */
+    .empty { text-align:center; padding:50px 20px; grid-column:span 2; }
+    .empty .ei { font-size:44px; margin-bottom:14px; }
+    .empty h3 { font-family:var(--fd); font-size:18px; color:var(--text); margin-bottom:6px; }
+    .empty p { color:var(--tD); font-size:13px; }
+
+    /* ── FAB WhatsApp ── */
+    .fab {
+      position:fixed; bottom:24px; right:18px;
+      background:linear-gradient(135deg,#25D366,#128C7E);
+      color:white; border:none; border-radius:50px;
+      padding:14px 18px; font-family:var(--fb); font-size:14px; font-weight:800;
+      cursor:pointer; display:flex; align-items:center; gap:7px;
+      box-shadow:0 6px 28px rgba(37,211,102,0.5),0 0 50px rgba(37,211,102,0.14);
+      z-index:150; animation:fabP 3s ease-in-out infinite;
+      border:1px solid rgba(255,255,255,0.2); touch-action:manipulation;
+      min-height:50px;
+    }
+    @keyframes fabP {
+      0%,100%{box-shadow:0 6px 28px rgba(37,211,102,0.5),0 0 50px rgba(37,211,102,0.14)}
+      50%{box-shadow:0 8px 38px rgba(37,211,102,0.7),0 0 70px rgba(37,211,102,0.25)}
+    }
+
+    /* ── BOT FAB ── */
+    .bot-fab {
+      position:fixed; bottom:90px; right:18px;
+      width:52px; height:52px;
+      background:linear-gradient(135deg,#6C63FF,#4A41D0);
+      color:white; border:none; border-radius:50%;
+      font-size:24px; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      box-shadow:0 6px 24px rgba(108,99,255,0.5),0 0 40px rgba(108,99,255,0.2);
+      z-index:150; transition:all .2s; touch-action:manipulation;
+      border:1px solid rgba(255,255,255,0.2);
+      animation:botP 4s ease-in-out infinite;
+    }
+    @keyframes botP {
+      0%,100%{box-shadow:0 6px 24px rgba(108,99,255,0.5),0 0 40px rgba(108,99,255,0.2)}
+      50%{box-shadow:0 8px 32px rgba(108,99,255,0.7),0 0 60px rgba(108,99,255,0.3)}
+    }
+    .bot-fab:active { transform:scale(.92); }
+    .bot-fab .bot-dot {
+      position:absolute; top:2px; right:2px;
+      width:12px; height:12px; background:#25D366;
+      border-radius:50%; border:2px solid var(--bg);
+    }
+
+    /* ── BOT PANEL ── */
+    .bot-panel {
+      position:fixed; bottom:0; right:0; left:0;
+      max-width:440px; margin:0 auto;
+      height:70vh; max-height:560px;
+      background:rgba(13,9,6,0.97); backdrop-filter:blur(40px);
+      border:1px solid rgba(255,255,255,0.1); border-bottom:none;
+      border-radius:28px 28px 0 0;
+      z-index:400; display:flex; flex-direction:column;
+      box-shadow:0 -20px 80px rgba(0,0,0,0.8);
+      animation:slideUp .35s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .bot-hdr {
+      padding:14px 18px; border-bottom:1px solid rgba(255,255,255,0.07);
+      display:flex; align-items:center; gap:10px; flex-shrink:0;
+    }
+    .bot-av {
+      width:40px; height:40px; border-radius:50%;
+      background:linear-gradient(135deg,#6C63FF,#4A41D0);
+      display:flex; align-items:center; justify-content:center; font-size:20px;
+      box-shadow:0 4px 14px rgba(108,99,255,0.4); flex-shrink:0;
+    }
+    .bot-av-info h3 { font-size:14px; font-weight:800; color:var(--text); }
+    .bot-av-info p { font-size:11px; color:var(--waG); }
+    .bot-av-info p::before { content:'● '; }
+    .bot-close {
+      margin-left:auto; width:34px; height:34px;
+      background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12);
+      color:var(--tD); border-radius:50%; cursor:pointer;
+      display:flex; align-items:center; justify-content:center;
+      font-size:15px; flex-shrink:0; touch-action:manipulation;
+    }
+    .bot-msgs {
+      flex:1; overflow-y:auto; padding:14px 16px;
+      display:flex; flex-direction:column; gap:10px;
+      -webkit-overflow-scrolling:touch; scrollbar-width:thin;
+    }
+    .bot-msgs::-webkit-scrollbar { width:3px; }
+    .bot-msgs::-webkit-scrollbar-thumb { background:rgba(108,99,255,0.3); border-radius:3px; }
+    .msg { max-width:82%; display:flex; flex-direction:column; gap:3px; }
+    .msg.bot { align-self:flex-start; }
+    .msg.usr { align-self:flex-end; }
+    .msg-bubble {
+      padding:10px 14px; border-radius:18px;
+      font-size:13px; font-weight:500; line-height:1.55;
+    }
+    .msg.bot .msg-bubble {
+      background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.1);
+      color:var(--text); border-top-left-radius:4px;
+    }
+    .msg.usr .msg-bubble {
+      background:linear-gradient(135deg,#6C63FF,#4A41D0);
+      color:white; border-top-right-radius:4px;
+      box-shadow:0 3px 12px rgba(108,99,255,0.3);
+    }
+    .msg-time { font-size:10px; color:var(--tDD); padding:0 4px; }
+    .typing { display:flex; gap:5px; align-items:center; padding:12px 14px; }
+    .typing span {
+      width:7px; height:7px; background:var(--tD); border-radius:50%;
+      animation:typD 1.2s ease-in-out infinite;
+    }
+    .typing span:nth-child(2){animation-delay:.2s}
+    .typing span:nth-child(3){animation-delay:.4s}
+    @keyframes typD { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+    .bot-foot {
+      padding:12px 14px; border-top:1px solid rgba(255,255,255,0.07);
+      display:flex; gap:8px; flex-shrink:0;
+    }
+    .bot-input {
+      flex:1; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12);
+      border-radius:50px; padding:11px 16px;
+      font-family:var(--fb); font-size:16px; color:var(--text); outline:none;
+      transition:all .2s;
+    }
+    .bot-input::placeholder { color:var(--tDD); }
+    .bot-input:focus { border-color:rgba(108,99,255,0.5); background:rgba(255,255,255,0.09); }
+    .bot-send {
+      width:44px; height:44px; flex-shrink:0;
+      background:linear-gradient(135deg,#6C63FF,#4A41D0);
+      border:none; border-radius:50%; color:white; font-size:18px;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      box-shadow:0 4px 14px rgba(108,99,255,0.4); touch-action:manipulation;
+    }
+    .bot-send:active { transform:scale(.9); }
+
+    /* ── MODALES ── */
+    .mback {
+      position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(8px);
+      z-index:300; display:flex; align-items:flex-end; justify-content:center;
+      animation:fadeIn .2s;
+    }
+    .mback.center { align-items:center; }
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    @keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+    @keyframes popIn{from{opacity:0;transform:scale(.82)}to{opacity:1;transform:scale(1)}}
+
+    /* ── MODAL PRODUCTO ── */
+    .pmodal {
+      background:rgba(15,10,7,0.98); backdrop-filter:blur(40px);
+      width:100%; max-width:660px; max-height:92vh;
+      border-radius:28px 28px 0 0; overflow-y:auto;
+      border:1px solid rgba(255,255,255,0.1); border-bottom:none;
+      box-shadow:0 -20px 80px rgba(0,0,0,0.8);
+      animation:slideUp .35s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .mclose {
+      position:absolute; top:14px; right:14px;
+      width:38px; height:38px; background:rgba(255,255,255,0.1);
+      backdrop-filter:blur(8px); color:var(--text);
+      border:1px solid rgba(255,255,255,0.15); border-radius:50%;
+      font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+      z-index:10; touch-action:manipulation;
+    }
+    .mimg-wrap { position:relative; }
+    .mimg { width:100%; height:240px; object-fit:cover; display:block; }
+    .mimg-grad { position:absolute; bottom:0; left:0; right:0; height:100px; background:linear-gradient(transparent,rgba(15,10,7,0.98)); pointer-events:none; }
+    .mbody { padding:20px; }
+    .mbadge {
+      display:inline-block; background:linear-gradient(135deg,var(--p1),var(--p2));
+      color:white; font-size:11px; font-weight:800; padding:4px 13px; border-radius:50px;
+      margin-bottom:10px; box-shadow:0 3px 12px var(--pG);
+    }
+    .mtitle { font-family:var(--fb); font-size:24px; font-weight:800; color:var(--text); margin-bottom:8px; line-height:1.25; }
+    .mdesc { font-size:14px; color:var(--tD); line-height:1.7; margin-bottom:18px; }
+    .mprice {
+      font-size:32px; font-weight:800; margin-bottom:20px;
+      background:linear-gradient(135deg,var(--p1),var(--gold));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    .mprice small { font-size:15px; -webkit-text-fill-color:var(--tD); }
+    .mactions { display:flex; flex-direction:column; gap:10px; }
+    .btn-wa {
+      background:linear-gradient(135deg,#25D366,#128C7E); color:white;
+      border:1px solid rgba(255,255,255,0.15); padding:15px; border-radius:50px;
+      font-family:var(--fb); font-size:15px; font-weight:800; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; gap:8px;
+      text-decoration:none; box-shadow:0 6px 24px var(--waG),inset 0 1px 0 rgba(255,255,255,0.2);
+      min-height:52px; touch-action:manipulation;
+    }
+    .btn-sec {
+      background:var(--glass); border:1px solid var(--gb); color:var(--tD);
+      padding:14px; border-radius:50px; font-family:var(--fb); font-size:14px;
+      font-weight:700; cursor:pointer; transition:all .2s;
+      min-height:50px; touch-action:manipulation;
+    }
+
+    /* ── CONTACT MODAL ── */
+    .cmodal {
+      background:rgba(15,10,7,0.98); backdrop-filter:blur(40px);
+      width:100%; max-width:520px; border-radius:28px 28px 0 0;
+      padding:26px 18px 36px;
+      border:1px solid rgba(255,255,255,0.1); border-bottom:none;
+      animation:slideUp .35s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .cmodal h2 { font-family:var(--fd); font-size:21px; color:var(--text); margin-bottom:5px; }
+    .cmodal>p { color:var(--tD); font-size:13px; margin-bottom:18px; }
+    .copt {
+      display:flex; align-items:center; gap:13px; padding:14px 15px;
+      border:1px solid var(--gb); border-radius:var(--r); margin-bottom:9px;
+      cursor:pointer; transition:all .22s; background:var(--glass);
+      text-decoration:none; min-height:62px; touch-action:manipulation;
+    }
+    .copt:active { border-color:rgba(255,87,34,0.5); background:var(--glH); }
+    .copt .oi { font-size:26px; flex-shrink:0; }
+    .copt h3 { font-size:14px; font-weight:800; color:var(--text); }
+    .copt p { font-size:11px; color:var(--tD); margin:0; }
+
+    /* ── PIN MODAL ── */
+    .pmod {
+      background:rgba(18,12,8,0.99); backdrop-filter:blur(40px);
+      width:calc(100% - 32px); max-width:380px; border-radius:28px;
+      padding:28px 22px; margin:16px;
+      border:1px solid rgba(255,255,255,0.1);
+      box-shadow:0 20px 80px rgba(0,0,0,0.8),0 0 60px rgba(255,87,34,0.07);
+      animation:popIn .32s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .pmod h2 { font-family:var(--fd); font-size:21px; color:var(--text); text-align:center; margin-bottom:5px; }
+    .pmod>p { text-align:center; color:var(--tD); font-size:12px; margin-bottom:20px; }
+    .pin-in {
+      width:100%; text-align:center; font-size:28px; font-weight:800; letter-spacing:10px;
+      padding:14px; border:1px solid var(--gb); border-radius:var(--r);
+      font-family:var(--fb); color:var(--text); background:var(--glass);
+      outline:none; margin-bottom:13px; transition:all .25s; -webkit-appearance:none;
+    }
+    .pin-in:focus { border-color:rgba(255,87,34,0.55); box-shadow:0 0 20px var(--pG); }
+    .pin-in.err { border-color:#FF4444; animation:shake .32s; }
+    .perr { color:#FF6B6B; text-align:center; font-size:12px; margin-bottom:10px; font-weight:700; }
+    @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+    .btn-pri {
+      width:100%; background:linear-gradient(135deg,var(--p1),var(--p2));
+      color:white; border:1px solid rgba(255,255,255,0.15); padding:14px; border-radius:50px;
+      font-family:var(--fb); font-size:15px; font-weight:800; cursor:pointer;
+      box-shadow:0 6px 22px var(--pG); min-height:50px; touch-action:manipulation;
+    }
+
+    /* ── ADMIN ── */
+    .adm-hdr {
+      background:rgba(12,8,6,0.88); backdrop-filter:blur(28px);
+      border-bottom:1px solid rgba(255,255,255,0.07);
+      padding:12px 16px; display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:200;
+    }
+    .adm-hdr h1 {
+      font-family:var(--fd); font-size:16px;
+      background:linear-gradient(135deg,#F5E8D5,#FFB07C);
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    }
+    .adm-btn {
+      background:var(--glass); border:1px solid var(--gb);
+      color:var(--tD); padding:8px 14px; border-radius:50px;
+      font-size:12px; font-weight:700; font-family:var(--fb); cursor:pointer;
+      min-height:38px; touch-action:manipulation;
+    }
+    .adm-cnt { max-width:660px; margin:0 auto; padding:16px 14px 120px; }
+    .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin-bottom:16px; }
+    .stat { background:var(--glass); backdrop-filter:blur(14px); border:1px solid var(--gb); border-radius:var(--rs); padding:14px 10px; text-align:center; }
+    .stat .sn { font-size:26px; font-weight:800; background:linear-gradient(135deg,var(--p1),var(--gold)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .stat .sl { font-size:10px; color:var(--tD); font-weight:700; text-transform:uppercase; letter-spacing:.4px; }
+    .add-btn {
+      width:100%; background:linear-gradient(135deg,var(--p1),var(--p2)); color:white;
+      border:1px solid rgba(255,255,255,0.15); padding:14px; border-radius:50px;
+      font-family:var(--fb); font-size:14px; font-weight:800; cursor:pointer;
+      margin-bottom:9px; display:flex; align-items:center; justify-content:center; gap:7px;
+      box-shadow:0 6px 22px var(--pG); min-height:50px; touch-action:manipulation;
+    }
+    .add-btn.dk { background:var(--glass); color:var(--tD); border:1px solid var(--gb); box-shadow:none; margin-bottom:18px; }
+    .sec-ttl { font-family:var(--fd); font-size:15px; font-weight:800; color:var(--text); margin-bottom:11px; }
+    .aprod { background:var(--glass); backdrop-filter:blur(14px); border:1px solid var(--gb); border-radius:var(--rs); overflow:hidden; margin-bottom:9px; display:flex; }
+    .aprod-img { width:74px; height:74px; object-fit:cover; flex-shrink:0; }
+    .aprod-inf { padding:10px; flex:1; min-width:0; }
+    .aprod-nm { font-weight:800; font-size:13px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .aprod-pr { font-weight:800; font-size:13px; background:linear-gradient(135deg,var(--p1),var(--gold)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .aprod-ct { font-size:10px; color:var(--tD); }
+    .aprod-act { display:flex; align-items:center; gap:3px; padding:10px; flex-shrink:0; }
+    .ic-btn { width:36px; height:36px; border:none; border-radius:10px; cursor:pointer; font-size:15px; display:flex; align-items:center; justify-content:center; touch-action:manipulation; }
+    .ic-btn.ed { background:rgba(255,152,0,0.14); }
+    .ic-btn.dl { background:rgba(255,68,68,0.11); }
+    .ic-btn.tg { background:rgba(37,211,102,0.11); }
+
+    /* ── FORM MODAL ── */
+    .fback { position:fixed; inset:0; background:rgba(0,0,0,0.82); backdrop-filter:blur(8px); z-index:400; display:flex; align-items:flex-end; justify-content:center; }
+    .fform { background:rgba(15,10,7,0.99); backdrop-filter:blur(40px); width:100%; max-width:660px; max-height:93vh; border-radius:28px 28px 0 0; overflow-y:auto; padding:22px; border:1px solid rgba(255,255,255,0.1); border-bottom:none; animation:slideUp .35s; }
+    .fform h2 { font-family:var(--fd); font-size:19px; color:var(--text); margin-bottom:18px; }
+    .fg { margin-bottom:13px; }
+    .fg label { display:block; font-size:11px; font-weight:800; color:var(--tD); margin-bottom:5px; text-transform:uppercase; letter-spacing:.6px; }
+    .fg input,.fg textarea,.fg select {
+      width:100%; padding:13px 14px; border:1px solid var(--gb); border-radius:var(--rs);
+      font-family:var(--fb); font-size:16px; color:var(--text);
+      background:var(--glass); outline:none; transition:all .22s; -webkit-appearance:none;
+    }
+    .fg input::placeholder,.fg textarea::placeholder { color:var(--tDD); }
+    .fg input:focus,.fg textarea:focus,.fg select:focus { border-color:rgba(255,87,34,0.5); box-shadow:0 0 16px var(--pG); }
+    .fg select option { background:#1a0f08; }
+    .fg textarea { min-height:76px; resize:vertical; }
+    .fgrid { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+    .tgl-row { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:var(--glass); border:1px solid var(--gb); border-radius:var(--rs); }
+    .tgl-row label { font-size:14px; font-weight:700; color:var(--tD); }
+    .tgl { width:46px; height:26px; background:rgba(255,255,255,0.12); border-radius:13px; position:relative; cursor:pointer; transition:background .22s; border:none; }
+    .tgl.on { background:linear-gradient(135deg,var(--wa),#128C7E); box-shadow:0 2px 10px var(--waG); }
+    .tgl::after { content:''; width:20px; height:20px; background:white; border-radius:50%; position:absolute; top:3px; left:3px; transition:left .22s; box-shadow:0 1px 4px rgba(0,0,0,0.3); }
+    .tgl.on::after { left:23px; }
+    .fact { display:flex; gap:10px; margin-top:18px; }
+    .btn-can { flex:1; background:var(--glass); border:1px solid var(--gb); color:var(--tD); padding:14px; border-radius:50px; font-family:var(--fb); font-size:14px; font-weight:700; cursor:pointer; min-height:50px; touch-action:manipulation; }
+    .btn-sav { flex:2; background:linear-gradient(135deg,var(--p1),var(--p2)); color:white; border:1px solid rgba(255,255,255,0.15); padding:14px; border-radius:50px; font-family:var(--fb); font-size:14px; font-weight:800; cursor:pointer; box-shadow:0 6px 22px var(--pG); min-height:50px; touch-action:manipulation; }
+
+    /* ── SETTINGS ── */
+    .sback { position:fixed; inset:0; background:rgba(0,0,0,0.82); backdrop-filter:blur(8px); z-index:400; display:flex; align-items:flex-end; justify-content:center; }
+    .sform { background:rgba(15,10,7,0.99); backdrop-filter:blur(40px); width:100%; max-width:660px; max-height:93vh; border-radius:28px 28px 0 0; overflow-y:auto; padding:22px; border:1px solid rgba(255,255,255,0.1); border-bottom:none; animation:slideUp .35s; }
+    .sform h2 { font-family:var(--fd); font-size:19px; color:var(--text); margin-bottom:18px; }
+
+    /* ── FOOTER ── */
+    .footer { text-align:center; padding:28px 20px 20px; border-top:1px solid rgba(255,255,255,0.07); margin-top:10px; }
+    .footer-logo { font-family:var(--fd); font-size:13px; font-weight:800; background:linear-gradient(135deg,var(--p1),var(--gold)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:6px; }
+    .footer-by { font-size:11px; color:var(--tD); font-weight:600; line-height:1.7; }
+    .footer-co { font-size:10px; color:var(--tDD); margin-top:8px; letter-spacing:.3px; }
+    .footer-dots { font-size:18px; color:var(--p1); opacity:.4; margin-top:6px; letter-spacing:4px; }
+
+    /* ── CARDS ENTER ANIM ── */
+    .pcard { animation:crdIn .4s ease both; }
+    @keyframes crdIn { from{opacity:0;transform:translateY(18px) scale(.96)} to{opacity:1;transform:translateY(0) scale(1)} }
+    .pcard:nth-child(1){animation-delay:.00s} .pcard:nth-child(2){animation-delay:.05s}
+    .pcard:nth-child(3){animation-delay:.10s} .pcard:nth-child(4){animation-delay:.15s}
+    .pcard:nth-child(5){animation-delay:.20s} .pcard:nth-child(6){animation-delay:.25s}
+    .pcard:nth-child(7){animation-delay:.30s} .pcard:nth-child(8){animation-delay:.35s}
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width:4px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:rgba(255,87,34,0.3); border-radius:4px; }
+
+    .nodisp-tag { background:rgba(255,68,68,0.13); border:1px solid rgba(255,68,68,0.28); color:#FF6B6B; padding:10px 14px; border-radius:12px; font-size:12px; font-weight:700; margin-bottom:16px; }
+    .divider { border:none; border-top:1px solid rgba(255,255,255,0.06); margin:18px 0; }
+
+    /* ── QUICK QUESTIONS ── */
+    .bot-qs { display:flex; flex-wrap:wrap; gap:6px; padding:10px 16px 0; }
+    .bot-q {
+      background:rgba(108,99,255,0.15); border:1px solid rgba(108,99,255,0.28);
+      color:#A89CFF; padding:6px 13px; border-radius:50px;
+      font-size:12px; font-weight:700; font-family:var(--fb);
+      cursor:pointer; touch-action:manipulation; transition:all .2s;
+    }
+    .bot-q:active { background:rgba(108,99,255,0.3); }
+  </style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toasts"></div>
+<div id="bot-wrap"></div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// CONSTANTES
+// ═══════════════════════════════════════════════════
+const SK = 'qcr_products';
+const SS = 'qcr_settings';
+const DEF = {
+  nombre:     'Sabores del Paseo',
+  tagline:    '25 años de sabor chihuahuense',
+  whatsapp:   '526141336143',
+  telefono:   '614-133-61-43',
+  horario:    'Lunes a Domingo · 8am – 3pm',
+  pin:        '1234',
+  categorias: ['Carnes','Tacos','Tortas','Bebidas y Sopas','Extras']
+};
+const PRODS0 = [
+  {id:'p1',nombre:'Carnitas por Kilo',    categoria:'Carnes',descripcion:'Jugosas carnitas estilo Michoacán, cocidas a fuego lento en cazuela de cobre. Perfectas para tacos, tortas o para llevar. Incluye salsas y tortillas de maíz artesanales.',precio:280,imagen:'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=500&q=80',badge:'⭐ Más Pedido',disponible:true},
+  {id:'p2',nombre:'Barbacoa por Kilo',    categoria:'Carnes',descripcion:'Barbacoa de res preparada en horno de pozo. Tierna, jugosa y aromática. Incluye consomé, cilantro, cebolla y tortillas de maíz recién hechas.',precio:320,imagen:'https://images.unsplash.com/photo-1558030006-450675393462?w=500&q=80',badge:'🔥 Favorito',disponible:true},
+  {id:'p3',nombre:'Asado de Puerco',      categoria:'Carnes',descripcion:'Receta tradicional chihuahuense. Carne de cerdo marinada en chile colorado y especias, guisada lentamente hasta lograr la textura y sabor perfectos.',precio:260,imagen:'https://images.unsplash.com/photo-1529193591184-b1d58069ecdd?w=500&q=80',badge:'🌶️ Chihuahua',disponible:true},
+  {id:'p4',nombre:'Orden de Tacos (3 pzs)',categoria:'Tacos',descripcion:'3 tacos rellenos de la carne de tu elección: carnitas, barbacoa o asado de puerco. Con tortilla de maíz, cilantro, cebolla, salsa y limón.',precio:75,imagen:'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=500&q=80',badge:'',disponible:true},
+  {id:'p5',nombre:'Torta de Carnitas',    categoria:'Tortas',descripcion:'Telera artesanal rellena de carnitas, frijoles, lechuga, tomate, aguacate, jalapeños y crema. Clásica y contundente.',precio:95,imagen:'https://images.unsplash.com/photo-1553909489-cd47e0907980?w=500&q=80',badge:'💪 Contundente',disponible:true},
+  {id:'p6',nombre:'Consomé de Res',       categoria:'Bebidas y Sopas',descripcion:'Consomé casero preparado con el caldo de la barbacoa. Reconfortante y lleno de sabor. Con garbanzos, cilantro y cebolla.',precio:45,imagen:'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=500&q=80',badge:'',disponible:true},
+  {id:'p7',nombre:'Combo Mixto ½ Kg',     categoria:'Carnes',descripcion:'Combinación perfecta: medio kilo con carnitas y barbacoa. Ideal para compartir o para probar lo mejor de nuestra cocina. Incluye tortillas y salsas.',precio:170,imagen:'https://images.unsplash.com/photo-1574894709920-11b28e7367e3?w=500&q=80',badge:'🎉 Combo',disponible:true},
+  {id:'p8',nombre:'Agua Fresca del Día',  categoria:'Bebidas y Sopas',descripcion:'Agua fresca preparada con fruta de temporada. Disponible en vaso (600ml) o litro. Pregunta por los sabores del día.',precio:30,imagen:'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=500&q=80',badge:'',disponible:true}
+];
+
+// ═══════════════════════════════════════════════════
+// ESTADO
+// ═══════════════════════════════════════════════════
+const st = { view:'catalog', products:[], settings:{}, cat:'Todos', q:'', product:null, showProd:false, showContact:false, showLogin:false, adminOk:false, showForm:false, editing:null, showSettings:false, pin:'', pinErr:false };
+let formDisp = true;
+
+// BOT STATE
+const bot = { open:false, msgs:[], loading:false, history:[] };
+
+function load(){
+  try{ const p=localStorage.getItem(SK); st.products=p?JSON.parse(p):[...PRODS0]; const s=localStorage.getItem(SS); st.settings=s?JSON.parse(s):{...DEF}; }
+  catch{ st.products=[...PRODS0]; st.settings={...DEF}; }
+}
+function saveP(){ localStorage.setItem(SK,JSON.stringify(st.products)); }
+function saveS(){ localStorage.setItem(SS,JSON.stringify(st.settings)); }
+
+// ═══════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════
+function render(){
+  document.getElementById('app').innerHTML = st.view==='catalog'? renderCatalog() : renderAdmin();
+  renderBot();
+  bind();
+}
+
+function renderCatalog(){
+  const s=st.settings, nom=s.nombre||DEF.nombre, tag=s.tagline||DEF.tagline;
+  const cats=['Todos',...(s.categorias||DEF.categorias)];
+  const fil=st.products.filter(p=>{
+    const mc=st.cat==='Todos'||p.categoria===st.cat;
+    const mq=!st.q||p.nombre.toLowerCase().includes(st.q.toLowerCase())||(p.descripcion||'').toLowerCase().includes(st.q.toLowerCase());
+    return mc&&mq;
+  });
+  return `
+  <header class="hdr">
+    <div class="hdr-inner">
+      <div class="logo">
+        <div class="logo-ic">🍖</div>
+        <div class="logo-tx"><h1>${esc(nom)}</h1><p>${esc(tag)}</p></div>
+      </div>
+      <button class="hdr-btn" id="j-contact">📞 Contacto</button>
+    </div>
+  </header>
+  <main class="main">
+    <div class="hero">
+      <div class="hi">🍖</div>
+      <div>
+        <h2>¡Bienvenido al menú!</h2>
+        <p>Carnitas · Barbacoa · Asado de Puerco<br>Pide directo por WhatsApp 💬</p>
+      </div>
+    </div>
+    <div class="sw"><span class="sw-ic">🔍</span><input type="search" id="j-search" placeholder="Buscar platillo…" value="${esc(st.q)}"></div>
+    <div class="cats">${cats.map(c=>`<button class="cat-btn${st.cat===c?' on':''}" data-cat="${esc(c)}">${esc(c)}</button>`).join('')}</div>
+    <div style="font-size:11px;color:var(--tDD);font-weight:700;margin-bottom:15px;letter-spacing:.3px;">
+      ${fil.length} ${fil.length===1?'PLATILLO':'PLATILLOS'}${st.cat!=='Todos'?' · '+esc(st.cat.toUpperCase()):''}
+    </div>
+    <div class="grid">
+      ${fil.length===0?`<div class="empty"><div class="ei">🍽️</div><h3>Sin resultados</h3><p>Prueba con otra búsqueda o categoría.</p></div>`:fil.map(renderCard).join('')}
+    </div>
+    <hr class="divider">
+    <div class="footer">
+      <div class="footer-logo">🍖 Sabores del Paseo</div>
+      <div class="footer-by">
+        Creada y Diseñada por: <strong>Lic. Agustín Flores C.</strong><br>
+        Una Empresa de <strong>Del Paseo Café</strong>
+      </div>
+      <div class="footer-dots">· · · · ·</div>
+      <div class="footer-co">© 2026 · Chihuahua, Chih., México · Todos los derechos reservados</div>
+    </div>
+  </main>
+  <button class="fab" id="j-fab">💬 Pedir por WhatsApp</button>
+  ${st.showProd&&st.product?renderProdModal(st.product):''}
+  ${st.showContact?renderContactModal():''}
+  ${st.showLogin?renderLoginModal():''}`;
+}
+
+function renderCard(p){ return `
+  <div class="pcard${p.disponible?'':' unavail'}" data-pid="${p.id}">
+    ${p.badge?`<div class="pbadge">${esc(p.badge)}</div>`:''}
+    <div class="piw">
+      <img class="pcard-img" src="${esc(p.imagen)}" alt="${esc(p.nombre)}" loading="lazy"
+           onerror="this.src='https://placehold.co/300x300/1a0f08/FF5722?text=🍖'">
+      ${!p.disponible?`<div class="uov">⚠️ Agotado</div>`:''}
+    </div>
+    <div class="pinfo">
+      <div class="pname">${esc(p.nombre)}</div>
+      <div class="pprice">$${parseFloat(p.precio).toFixed(0)}<small style="-webkit-text-fill-color:var(--tD);font-size:11px;font-weight:600;"> MXN</small></div>
+      <button class="pver-btn" data-pid="${p.id}">Ver detalle →</button>
+    </div>
+  </div>`; }
+
+function renderProdModal(p){
+  const wa=st.settings.whatsapp||DEF.whatsapp;
+  const msg=encodeURIComponent(`Hola! Me interesa pedir: *${p.nombre}* ($${p.precio} MXN). ¿Está disponible?`);
+  return `<div class="mback" id="j-mback">
+    <div class="pmodal">
+      <div class="mimg-wrap">
+        <button class="mclose" id="j-mclose">✕</button>
+        <img class="mimg" src="${esc(p.imagen)}" alt="${esc(p.nombre)}" onerror="this.src='https://placehold.co/600x240/1a0f08/FF5722?text=🍖'">
+        <div class="mimg-grad"></div>
+      </div>
+      <div class="mbody">
+        ${p.badge?`<div class="mbadge">${esc(p.badge)}</div>`:''}
+        <h2 class="mtitle">${esc(p.nombre)}</h2>
+        <p class="mdesc">${esc(p.descripcion||'')}</p>
+        <div class="mprice">$${parseFloat(p.precio).toFixed(2)} <small>MXN</small></div>
+        ${!p.disponible?`<div class="nodisp-tag">⚠️ No disponible por el momento.</div>`:''}
+        <div class="mactions">
+          ${p.disponible?`<a class="btn-wa" href="https://wa.me/${wa}?text=${msg}" target="_blank">💬 Pedir por WhatsApp</a>`:''}
+          <button class="btn-sec" id="j-mclose2">← Volver al menú</button>
+        </div>
+      </div>
+    </div>
+  </div>`; }
+
+function renderContactModal(){
+  const s=st.settings, wa=s.whatsapp||DEF.whatsapp, tel=s.telefono||DEF.telefono, hor=s.horario||DEF.horario;
+  const msg=encodeURIComponent('Hola! Me gustaría hacer un pedido 🍖');
+  return `<div class="mback" id="j-cback">
+    <div class="cmodal">
+      <h2>📞 Contáctanos</h2>
+      <p>Elige cómo quieres comunicarte:</p>
+      <a class="copt" href="https://wa.me/${wa}?text=${msg}" target="_blank">
+        <div class="oi">💬</div><div><h3>WhatsApp</h3><p>${tel} · Pedidos rápidos</p></div>
+      </a>
+      <a class="copt" href="tel:${tel.replace(/\D/g,'')}">
+        <div class="oi">📱</div><div><h3>Llamar · ${tel}</h3><p>${esc(hor)}</p></div>
+      </a>
+      <div class="copt" id="j-go-admin">
+        <div class="oi">🔐</div><div><h3>Panel Administrador</h3><p>Gestión de productos y configuración</p></div>
+      </div>
+      <button class="btn-sec" id="j-cclose" style="width:100%;margin-top:8px;">Cerrar</button>
+    </div>
+  </div>`; }
+
+function renderLoginModal(){ return `
+  <div class="mback center" id="j-pback">
+    <div class="pmod">
+      <h2>🔐 Admin</h2>
+      <p>Ingresa tu PIN de administrador</p>
+      <input type="password" id="j-pin" class="pin-in${st.pinErr?' err':''}" maxlength="8" placeholder="••••" value="${esc(st.pin)}" inputmode="numeric">
+      ${st.pinErr?`<div class="perr">PIN incorrecto. Intenta de nuevo.</div>`:''}
+      <button class="btn-pri" id="j-pinok">Acceder</button>
+      <button class="btn-can" id="j-pincan" style="width:100%;margin-top:8px;">Cancelar</button>
+    </div>
+  </div>`; }
+
+// ═══════════════════════════════════════════════════
+// ADMIN
+// ═══════════════════════════════════════════════════
+function renderAdmin(){
+  const av=st.products.filter(p=>p.disponible).length, un=st.products.filter(p=>!p.disponible).length;
+  return `
+  <header class="adm-hdr">
+    <button class="adm-btn" id="j-adm-back">← Menú</button>
+    <h1>Panel Admin</h1>
+    <button class="adm-btn" id="j-logout">Salir 🔓</button>
+  </header>
+  <div class="adm-cnt">
+    <div class="stats">
+      <div class="stat"><div class="sn">${st.products.length}</div><div class="sl">Total</div></div>
+      <div class="stat"><div class="sn" style="background:linear-gradient(135deg,#25D366,#1da851);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">${av}</div><div class="sl">Disponibles</div></div>
+      <div class="stat"><div class="sn" style="background:linear-gradient(135deg,#FF4444,#FF8888);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">${un}</div><div class="sl">Agotados</div></div>
+    </div>
+    <button class="add-btn" id="j-add">➕ Agregar Platillo</button>
+    <button class="add-btn dk" id="j-settings">⚙️ Configuración del Restaurante</button>
+    <div class="sec-ttl">Mis Platillos (${st.products.length})</div>
+    ${st.products.map(p=>`<div class="aprod">
+      <img class="aprod-img" src="${esc(p.imagen)}" alt="${esc(p.nombre)}" onerror="this.src='https://placehold.co/74x74/1a0f08/FF5722?text=🍖'">
+      <div class="aprod-inf"><div class="aprod-nm">${esc(p.nombre)}</div><div class="aprod-pr">$${parseFloat(p.precio).toFixed(0)} MXN</div><div class="aprod-ct">${esc(p.categoria)} · ${p.disponible?'✅ Disponible':'❌ Agotado'}</div></div>
+      <div class="aprod-act">
+        <button class="ic-btn tg" data-tg="${p.id}">${p.disponible?'✅':'❌'}</button>
+        <button class="ic-btn ed" data-ed="${p.id}">✏️</button>
+        <button class="ic-btn dl" data-dl="${p.id}">🗑️</button>
+      </div>
+    </div>`).join('')}
+  </div>
+  ${st.showForm?renderForm():''}
+  ${st.showSettings?renderSettForm():''}`;
+}
+
+function renderForm(){
+  const p=st.editing||{}, isEd=!!p.id, cats=st.settings.categorias||DEF.categorias;
+  return `<div class="fback"><div class="fform">
+    <h2>${isEd?'✏️ Editar':'➕ Nuevo Platillo'}</h2>
+    <div class="fg"><label>Nombre *</label><input type="text" id="ff-nom" value="${esc(p.nombre||'')}" placeholder="Ej: Carnitas por Kilo"></div>
+    <div class="fgrid">
+      <div class="fg"><label>Precio MXN *</label><input type="number" id="ff-pre" value="${p.precio||''}" placeholder="0" min="0" step="1"></div>
+      <div class="fg"><label>Categoría *</label><select id="ff-cat">${cats.map(c=>`<option value="${esc(c)}"${p.categoria===c?' selected':''}>${esc(c)}</option>`).join('')}</select></div>
+    </div>
+    <div class="fg"><label>Descripción</label><textarea id="ff-desc" placeholder="Describe el platillo…">${esc(p.descripcion||'')}</textarea></div>
+    <div class="fg"><label>URL de Imagen</label><input type="url" id="ff-img" value="${esc(p.imagen||'')}" placeholder="https://…"></div>
+    <div class="fg"><label>Badge / Etiqueta</label><input type="text" id="ff-badge" value="${esc(p.badge||'')}" placeholder="Ej: ⭐ Más Pedido"></div>
+    <div class="fg"><div class="tgl-row"><label>¿Disponible?</label><button class="tgl${formDisp?' on':''}" id="ff-tgl"></button></div></div>
+    <div class="fact"><button class="btn-can" id="j-fcan">Cancelar</button><button class="btn-sav" id="j-fsav">${isEd?'Guardar Cambios':'Agregar Platillo'}</button></div>
+  </div></div>`; }
+
+function renderSettForm(){
+  const s=st.settings;
+  return `<div class="sback"><div class="sform">
+    <h2>⚙️ Configuración</h2>
+    <div class="fg"><label>Nombre del Restaurante</label><input type="text" id="sf-nom" value="${esc(s.nombre||'')}"></div>
+    <div class="fg"><label>Subtítulo / Eslogan</label><input type="text" id="sf-tag" value="${esc(s.tagline||'')}"></div>
+    <div class="fg"><label>WhatsApp (con código país, sin +)</label><input type="text" id="sf-wa" value="${esc(s.whatsapp||'')}" placeholder="526141336143"></div>
+    <div class="fg"><label>Teléfono local</label><input type="text" id="sf-tel" value="${esc(s.telefono||'')}"></div>
+    <div class="fg"><label>Horario de Atención</label><input type="text" id="sf-hor" value="${esc(s.horario||'')}"></div>
+    <div class="fg"><label>Nuevo PIN de Admin</label><input type="password" id="sf-pin" placeholder="Dejar vacío = sin cambio"></div>
+    <div class="fg"><label>Categorías (separar con coma)</label><input type="text" id="sf-cats" value="${esc((s.categorias||[]).join(','))}"></div>
+    <div class="fact"><button class="btn-can" id="j-scan">Cancelar</button><button class="btn-sav" id="j-ssav">Guardar Configuración</button></div>
+  </div></div>`; }
+
+// ═══════════════════════════════════════════════════
+// BOT IA
+// ═══════════════════════════════════════════════════
+function botSystemPrompt(){
+  const s=st.settings, nom=s.nombre||DEF.nombre, tel=s.telefono||DEF.telefono, hor=s.horario||DEF.horario;
+  const menu=st.products.map(p=>`- ${p.nombre}: $${p.precio} MXN${p.badge?' ('+p.badge+')':''}${!p.disponible?' [AGOTADO]':''}\n  ${p.descripcion||''}`).join('\n');
+  return `Eres el asistente virtual de "${nom}" en Chihuahua, México. Eres amigable, cálido y muy conocedor del menú y el negocio. Responde siempre en español, de forma breve y útil.
+
+MENÚ ACTUAL:
+${menu}
+
+INFORMACIÓN DEL NEGOCIO:
+- Nombre: ${nom}
+- Teléfono/WhatsApp: ${tel}
+- Horario: ${hor}
+- Especialidad: Carnitas, Barbacoa y Asado de Puerco estilo Chihuahua
+- Aceptamos pedidos por WhatsApp para llevar
+- 25 años de tradición en Chihuahua
+
+Si el cliente quiere hacer un pedido, dile que puede hacerlo por WhatsApp al ${tel}. Usa emojis con moderación. Respuestas máximo 3 oraciones.`;
+}
+
+const BOT_QS = ['¿Cuánto cuesta el kilo?','¿Tienen barbacoa hoy?','¿Cuál es el más pedido?','¿A qué hora cierran?','¿Hacen pedidos a domicilio?'];
+
+function renderBot(){
+  const wrap=document.getElementById('bot-wrap');
+  if(!bot.open){
+    wrap.innerHTML=`<button class="bot-fab" id="bot-open" title="Preguntar al asistente">🤖<div class="bot-dot"></div></button>`;
+    const btn=document.getElementById('bot-open');
+    if(btn) btn.addEventListener('click',()=>{ bot.open=true; if(!bot.msgs.length) botWelcome(); renderBot(); });
+    return;
+  }
+  const now=new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+  wrap.innerHTML=`
+    <div class="bot-panel">
+      <div class="bot-hdr">
+        <div class="bot-av">🤖</div>
+        <div class="bot-av-info"><h3>Asistente del Menú</h3><p>En línea ahora</p></div>
+        <button class="bot-close" id="bot-cls">✕</button>
+      </div>
+      <div class="bot-qs">${BOT_QS.map((q,i)=>`<button class="bot-q" data-qi="${i}">${q}</button>`).join('')}</div>
+      <div class="bot-msgs" id="bot-msgs">
+        ${bot.msgs.map(m=>`
+          <div class="msg ${m.role==='assistant'?'bot':'usr'}">
+            <div class="msg-bubble">${esc(m.content)}</div>
+            <div class="msg-time">${m.time||''}</div>
+          </div>`).join('')}
+        ${bot.loading?`<div class="msg bot"><div class="msg-bubble"><div class="typing"><span></span><span></span><span></span></div></div></div>`:''}
+      </div>
+      <div class="bot-foot">
+        <input class="bot-input" id="bot-in" type="text" placeholder="Escribe tu pregunta…" autocomplete="off">
+        <button class="bot-send" id="bot-snd">➤</button>
+      </div>
+    </div>`;
+
+  const msgs=document.getElementById('bot-msgs');
+  if(msgs) msgs.scrollTop=msgs.scrollHeight;
+
+  const cls=document.getElementById('bot-cls');
+  if(cls) cls.addEventListener('click',()=>{ bot.open=false; renderBot(); });
+
+  document.querySelectorAll('.bot-q').forEach(btn=>{
+    btn.addEventListener('click',()=>{ const q=BOT_QS[+btn.dataset.qi]; sendBotMsg(q); });
+  });
+
+  const inp=document.getElementById('bot-in');
+  const snd=document.getElementById('bot-snd');
+  if(inp){
+    inp.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); sendBotMsg(inp.value); } });
+    setTimeout(()=>inp.focus(),100);
+  }
+  if(snd) snd.addEventListener('click',()=>{ const v=document.getElementById('bot-in')?.value||''; sendBotMsg(v); });
+}
+
+function botWelcome(){
+  const s=st.settings;
+  bot.msgs.push({ role:'assistant', content:`¡Hola! 👋 Soy el asistente de *${s.nombre||DEF.nombre}*. Puedo ayudarte con el menú, precios, horarios y pedidos. ¿En qué te ayudo?`, time:now() });
+}
+
+function now(){ return new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}); }
+
+async function sendBotMsg(text){
+  text=(text||'').trim();
+  if(!text||bot.loading) return;
+  const inp=document.getElementById('bot-in');
+  if(inp) inp.value='';
+  bot.msgs.push({role:'user',content:text,time:now()});
+  bot.history.push({role:'user',content:text});
+  bot.loading=true; renderBot();
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:300,
+        system:botSystemPrompt(),
+        messages:bot.history.slice(-8)
+      })
+    });
+    const data=await res.json();
+    const reply=(data.content&&data.content[0]?.text)||'Lo siento, no pude responder ahora. Llámanos al '+(st.settings.telefono||DEF.telefono)+' 😊';
+    bot.msgs.push({role:'assistant',content:reply,time:now()});
+    bot.history.push({role:'assistant',content:reply});
+  }catch(e){
+    bot.msgs.push({role:'assistant',content:'Tuve un problema de conexión. Puedes contactarnos por WhatsApp al '+(st.settings.telefono||DEF.telefono)+' 💬',time:now()});
+  }
+  bot.loading=false; renderBot();
+}
+
+// ═══════════════════════════════════════════════════
+// EVENTOS
+// ═══════════════════════════════════════════════════
+function bind(){
+  q('#j-search',el=>el.addEventListener('input',e=>{ st.q=e.target.value; render(); }));
+  q('#j-contact',el=>el.addEventListener('click',()=>{ st.showContact=true; render(); }));
+  q('#j-fab',el=>el.addEventListener('click',()=>{ const wa=st.settings.whatsapp||DEF.whatsapp; window.open(`https://wa.me/${wa}?text=${encodeURIComponent('Hola! Me gustaría hacer un pedido 🍖')}`,'_blank'); }));
+  all('.cat-btn',el=>el.addEventListener('click',()=>{ st.cat=el.dataset.cat; render(); }));
+  all('.pcard',el=>el.addEventListener('click',()=>openModal(el.dataset.pid)));
+  all('.pver-btn',el=>el.addEventListener('click',e=>{ e.stopPropagation(); openModal(el.dataset.pid); }));
+  q('#j-mback',el=>el.addEventListener('click',e=>{ if(e.target===el) closeModal(); }));
+  q('#j-mclose',el=>el.addEventListener('click',closeModal));
+  q('#j-mclose2',el=>el.addEventListener('click',closeModal));
+  q('#j-cback',el=>el.addEventListener('click',e=>{ if(e.target===el) closeContact(); }));
+  q('#j-cclose',el=>el.addEventListener('click',closeContact));
+  q('#j-go-admin',el=>el.addEventListener('click',()=>{ st.showContact=false; if(st.adminOk){st.view='admin';}else{st.showLogin=true;} render(); }));
+  q('#j-pin',el=>{ el.addEventListener('input',e=>{ st.pin=e.target.value; }); el.addEventListener('keydown',e=>{ if(e.key==='Enter') checkPin(); }); setTimeout(()=>el.focus(),80); });
+  q('#j-pinok',el=>el.addEventListener('click',checkPin));
+  q('#j-pincan',el=>el.addEventListener('click',()=>{ st.showLogin=false; st.pin=''; st.pinErr=false; render(); }));
+  q('#j-adm-back',el=>el.addEventListener('click',()=>{ st.view='catalog'; render(); }));
+  q('#j-logout',el=>el.addEventListener('click',()=>{ st.adminOk=false; st.view='catalog'; render(); }));
+  q('#j-add',el=>el.addEventListener('click',()=>{ st.editing={disponible:true}; formDisp=true; st.showForm=true; render(); }));
+  q('#j-settings',el=>el.addEventListener('click',()=>{ st.showSettings=true; render(); }));
+  all('[data-tg]',el=>el.addEventListener('click',()=>{ const p=st.products.find(x=>x.id===el.dataset.tg); if(p){p.disponible=!p.disponible;saveP();toast(p.disponible?'✅ Disponible':'❌ Agotado');render();} }));
+  all('[data-ed]',el=>el.addEventListener('click',()=>{ st.editing={...st.products.find(x=>x.id===el.dataset.ed)}; formDisp=st.editing.disponible!==false; st.showForm=true; render(); }));
+  all('[data-dl]',el=>el.addEventListener('click',()=>{ const p=st.products.find(x=>x.id===el.dataset.dl); if(p&&confirm(`¿Eliminar "${p.nombre}"?`)){ st.products=st.products.filter(x=>x.id!==el.dataset.dl); saveP(); toast('🗑️ Eliminado'); render(); } }));
+  q('#ff-tgl',el=>el.addEventListener('click',()=>{ formDisp=!formDisp; el.classList.toggle('on',formDisp); }));
+  q('#j-fcan',el=>el.addEventListener('click',()=>{ st.showForm=false; st.editing=null; render(); }));
+  q('#j-fsav',el=>el.addEventListener('click',saveProd));
+  q('#j-scan',el=>el.addEventListener('click',()=>{ st.showSettings=false; render(); }));
+  q('#j-ssav',el=>el.addEventListener('click',saveConf));
+}
+
+function openModal(id){ st.product=st.products.find(p=>p.id===id); if(st.product){st.showProd=true;render();} }
+function closeModal(){ st.showProd=false; st.product=null; render(); }
+function closeContact(){ st.showContact=false; render(); }
+
+function checkPin(){
+  const correct=st.settings.pin||DEF.pin;
+  if(st.pin===correct){ st.adminOk=true; st.showLogin=false; st.pin=''; st.pinErr=false; st.view='admin'; render(); }
+  else{ st.pinErr=true; st.pin=''; render(); setTimeout(()=>{ st.pinErr=false; const el=document.getElementById('j-pin'); if(el){el.classList.remove('err');el.focus();} },900); }
+}
+
+function saveProd(){
+  const nom=(document.getElementById('ff-nom')?.value||'').trim();
+  const pre=parseFloat(document.getElementById('ff-pre')?.value||'0');
+  const cat=document.getElementById('ff-cat')?.value||'';
+  const desc=(document.getElementById('ff-desc')?.value||'').trim();
+  const img=(document.getElementById('ff-img')?.value||'').trim();
+  const badge=(document.getElementById('ff-badge')?.value||'').trim();
+  if(!nom){alert('El nombre es obligatorio.');return;}
+  if(isNaN(pre)||pre<0){alert('El precio debe ser válido.');return;}
+  const prod={id:st.editing?.id||'p'+Date.now(),nombre:nom,categoria:cat,descripcion:desc,precio:pre,imagen:img||'https://placehold.co/400x400/1a0f08/FF5722?text=🍖',badge,disponible:formDisp};
+  if(st.editing?.id){const i=st.products.findIndex(p=>p.id===st.editing.id);if(i!==-1)st.products[i]=prod;toast('✅ Platillo actualizado');}
+  else{st.products.push(prod);toast('✅ Platillo agregado');}
+  saveP(); st.showForm=false; st.editing=null; render();
+}
+
+function saveConf(){
+  const nom=(document.getElementById('sf-nom')?.value||'').trim();
+  if(!nom){alert('El nombre es obligatorio.');return;}
+  const wa=(document.getElementById('sf-wa')?.value||'').trim();
+  const tel=(document.getElementById('sf-tel')?.value||'').trim();
+  const pin=(document.getElementById('sf-pin')?.value||'').trim();
+  const cats=(document.getElementById('sf-cats')?.value||'').split(',').map(c=>c.trim()).filter(Boolean);
+  Object.assign(st.settings,{
+    nombre:nom,
+    tagline:(document.getElementById('sf-tag')?.value||'').trim(),
+    whatsapp:wa||st.settings.whatsapp,
+    telefono:tel||st.settings.telefono,
+    horario:(document.getElementById('sf-hor')?.value||'').trim(),
+  });
+  if(pin) st.settings.pin=pin;
+  if(cats.length) st.settings.categorias=cats;
+  saveS(); st.showSettings=false; toast('⚙️ Configuración guardada'); render();
+}
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function q(sel,fn){ const el=document.querySelector(sel); if(el)fn(el); }
+function all(sel,fn){ document.querySelectorAll(sel).forEach(fn); }
+function toast(msg){ const d=document.createElement('div'); d.className='toast'; d.textContent=msg; document.getElementById('toasts').appendChild(d); setTimeout(()=>d.remove(),3000); }
+
+// ═══════════════════════════════════════════════════
+// INICIO
+// ═══════════════════════════════════════════════════
+load();
+render();
+</script>
+</body>
+</html>
